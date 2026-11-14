@@ -13,26 +13,31 @@
 #   1. VoiceInk/Info.plist      SUEnableAutomaticChecks = false, SUFeedURL -> empty VoiceInk-Free feed.
 #   2. AppDefaults.swift        "Show Announcements" off by default.
 #   3. LocalBuild.xcconfig      ARCHS = arm64 (Apple Silicon only).
+#   4. UpdaterViewModel.swift   "Check for Updates" opens the VoiceInk-Free Releases page instead of Sparkle.
 #
 # Environment overrides:
-#   FREE_FEED_URL   Sparkle feed for manual "Check for Updates" (default: empty appcast in this repo).
+#   FREE_FEED_URL       Sparkle feed, only used if the user turns automatic checks on
+#                       (default: empty appcast in this repo).
+#   FREE_RELEASES_URL   page opened by "Check for Updates" (default: Releases of this repo).
 
 set -euo pipefail
 
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 FREE_FEED_URL="${FREE_FEED_URL:-https://raw.githubusercontent.com/ergSey/VoiceInk-Free/main/appcast-free.xml}"
+FREE_RELEASES_URL="${FREE_RELEASES_URL:-https://github.com/ergSey/VoiceInk-Free/releases}"
 PLIST_BUDDY=/usr/libexec/PlistBuddy
 
 INFO_PLIST="VoiceInk/Info.plist"
 APP_DEFAULTS="VoiceInk/App/Configuration/AppDefaults.swift"
 LOCAL_XCCONFIG="LocalBuild.xcconfig"
-PATCHED_FILES=("$INFO_PLIST" "$APP_DEFAULTS" "$LOCAL_XCCONFIG")
+UPDATER_VM="VoiceInk/App/Updates/UpdaterViewModel.swift"
+PATCHED_FILES=("$INFO_PLIST" "$APP_DEFAULTS" "$LOCAL_XCCONFIG" "$UPDATER_VM")
 
 log() { printf '[patch] %s\n' "$*"; }
 fail() { printf '[patch] error: %s\n' "$*" >&2; exit 1; }
 
 usage() {
-    sed -n '2,18p' "${BASH_SOURCE[0]}" | sed 's/^# \{0,1\}//'
+    sed -n '2,21p' "${BASH_SOURCE[0]}" | sed 's/^# \{0,1\}//'
     exit 2
 }
 
@@ -68,6 +73,18 @@ apply_patches() {
     local xcconfig="$REPO_ROOT/$LOCAL_XCCONFIG"
     log "LocalBuild.xcconfig: ARCHS=arm64"
     printf '\n// VoiceInk-Free: Apple Silicon only\nARCHS = arm64\nONLY_ACTIVE_ARCH = NO\n' >> "$xcconfig"
+
+    local updater="$REPO_ROOT/$UPDATER_VM"
+    log "UpdaterViewModel.swift: Check for Updates opens $FREE_RELEASES_URL"
+    grep -q '^        updaterController.checkForUpdates(nil)$' "$updater" \
+        || fail "manual update check call not found in $UPDATER_VM (upstream changed?)"
+    grep -q '^import SwiftUI$' "$updater" \
+        || fail "import SwiftUI not found in $UPDATER_VM (upstream changed?)"
+    sed -i '' \
+        -e 's/^import SwiftUI$/import AppKit\
+import SwiftUI/' \
+        -e "s|^        updaterController.checkForUpdates(nil)\$|        NSWorkspace.shared.open(URL(string: \"$FREE_RELEASES_URL\")!) // VoiceInk-Free|" \
+        "$updater"
 }
 
 restore_patches() {
@@ -91,11 +108,14 @@ verify_app() {
     value="$("$PLIST_BUDDY" -c "Print :SUFeedURL" "$plist")"
     [[ "$value" == "$FREE_FEED_URL" ]] || fail "SUFeedURL is '$value', expected $FREE_FEED_URL"
 
+    grep -aqF "$FREE_RELEASES_URL" "$app/Contents/MacOS/VoiceInk" \
+        || fail "Releases URL not found in the binary, Check for Updates patch missing"
+
     archs="$(lipo -archs "$app/Contents/MacOS/VoiceInk")"
     [[ "$archs" == "arm64" ]] || fail "binary architectures are '$archs', expected arm64"
 
     codesign --verify --deep --strict "$app" || fail "code signature is invalid"
-    log "verified: automatic checks off, feed $FREE_FEED_URL, arch $archs, signature valid"
+    log "verified: automatic checks off, feed $FREE_FEED_URL, Check for Updates -> $FREE_RELEASES_URL, arch $archs, signature valid"
 }
 
 [[ $# -eq 2 ]] || usage

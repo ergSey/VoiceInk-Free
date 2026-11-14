@@ -1,3 +1,64 @@
+<!-- VoiceInk-Free: this block is maintained in this repository. The original VoiceInk README follows below it unchanged. -->
+
+# VoiceInk-Free
+
+**Free ready-to-use builds of [VoiceInk](https://github.com/Beingpax/VoiceInk) for Apple Silicon Macs.** Unofficial, not affiliated with the author. [Русская версия](README.ru.md)
+
+**[⬇ Download the latest DMG](https://github.com/ergSey/VoiceInk-Free/releases/latest)**
+
+> [!IMPORTANT]
+> Don't build this repository yourself: download a ready-made DMG from [Releases](https://github.com/ergSey/VoiceInk-Free/releases). The code here is the original VoiceInk plus a small build script. To build from source or follow development, go to the original project: [Beingpax/VoiceInk](https://github.com/Beingpax/VoiceInk).
+
+The author of VoiceInk sells the ready-made app for **$25** (one-time purchase for one Mac, see [tryvoiceink.com/pricing](https://tryvoiceink.com/pricing), November 2026). Here the same app is already built and free. If VoiceInk is useful to you, please **support the author by [buying a license](https://tryvoiceink.com/pricing)**: it funds the development of the app you are using.
+
+VoiceInk can work entirely on local models. Speech recognition (whisper.cpp, Parakeet) and AI text cleanup (VoiceInk Refine on MLX, or Ollama) run on your Mac, so dictation is very fast and needs no internet connection. The app also supports cloud providers (OpenAI, Groq, Deepgram and others), but you don't need them.
+
+## Install
+
+1. Download `VoiceInk-<version>-arm64.dmg` from [Releases](https://github.com/ergSey/VoiceInk-Free/releases).
+2. Open the DMG and drag VoiceInk to Applications.
+3. The app is not notarized by Apple, so macOS blocks the first launch. Run once in Terminal:
+   ```shell
+   xattr -cr /Applications/VoiceInk.app
+   ```
+   or try to open the app, then go to System Settings → Privacy & Security and click **Open Anyway**.
+
+Optional: check the download against the `.sha256` file from the same release:
+
+```shell
+shasum -a 256 -c VoiceInk-<version>-arm64.dmg.sha256
+```
+
+Requirements: Apple Silicon Mac, macOS 15.0 or later.
+
+> [!NOTE]
+> This build uses the same app ID as the official VoiceInk, so it shares settings and data with it. Don't install both: remove the official app first.
+
+## Updates
+
+The app doesn't update itself. **Check for Updates** (in Settings and in the menu bar) opens the [Releases](https://github.com/ergSey/VoiceInk-Free/releases) page of this repository. To get notified about new versions, click **Watch → Custom → Releases** at the top of this page.
+
+## Changes from the original
+
+The source code is the original. The changes are applied only at build time by [`scripts/free/patch.sh`](scripts/free/patch.sh):
+
+- **Automatic update checks are off.** **Check for Updates** opens the Releases page of this repository. The Sparkle update feed points to an empty [`appcast-free.xml`](appcast-free.xml), so the app never offers to install the official paid build.
+- **Announcements are off by default.** You can turn them on in Settings → General → Show Announcements.
+- **No license needed.** The app is built with `LOCAL_BUILD`, the original's own flag for builds from source.
+- **No iCloud sync for the dictionary** (also turned off by `LOCAL_BUILD`).
+- **Apple Silicon (arm64) only.**
+- **Ad-hoc signature, not notarized.** Gatekeeper needs `xattr -cr` or **Open Anyway** once, see [Install](#install).
+
+## Issues and license
+
+Report problems with installing these builds in [issues of this repository](https://github.com/ergSey/VoiceInk-Free/issues), not to the original author.
+
+VoiceInk is © Pax (Beingpax) and contributors, licensed under [GPL-3.0](LICENSE). This repository keeps the original license and only adds build scripts.
+
+---
+
+## Original README
+
 <div align="center">
   <img src="VoiceInk/Assets.xcassets/AppIcon.appiconset/256-mac.png" width="180" height="180" />
   <h1>VoiceInk</h1>
