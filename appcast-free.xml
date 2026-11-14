@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  VoiceInk-Free update feed. Intentionally empty: VoiceInk-Free builds do not
+  update themselves, so a manual "Check for Updates" always reports the latest
+  version. New builds are published at
+  https://github.com/ergSey/VoiceInk-Free/releases
+-->
+<rss version="2.0" xmlns:sparkle="http://www.andymatuschak.org/xml-namespaces/sparkle">
+    <channel>
+        <title>VoiceInk-Free</title>
+        <link>https://github.com/ergSey/VoiceInk-Free/releases</link>
+        <description>VoiceInk-Free does not auto-update. Download new versions from GitHub Releases.</description>
+        <language>en</language>
+    </channel>
+</rss>
