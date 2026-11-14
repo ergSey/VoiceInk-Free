@@ -1,20 +1,16 @@
-# ⚠️ This Project Does Not Accept Pull Requests
+<!--
+VoiceInk-Free accepts pull requests only for its own files:
+build scripts (scripts/free/), workflows (.github/), README.md / README.ru.md and appcast-free.xml.
 
-Thank you for your interest in contributing to VoiceInk!
+Changes to the app's code (VoiceInk/, VoiceInkRefineXPC/, Shared/ and the Xcode project)
+belong to the original project: https://github.com/Beingpax/VoiceInk
+Releases are built from the original tags as they are, so app changes here would never reach a release.
+-->
 
-However, **this project is not currently accepting pull requests.**
+## What and why
 
-## Please close this PR
+## How it was tested
 
-## Alternative ways to contribute:
+<!-- e.g. scripts/free/build-dmg.sh locally, scripts/free/patch.sh verify, a workflow run link -->
 
-- 🐛 **Report bugs**: Open an [issue](../../issues) with detailed information
-- 💡 **Suggest features**: Share your ideas via [issues](../../issues) or [discussions](../../discussions)
-- 🍴 **Fork the project**: You're welcome to create and maintain your own fork
-- 📖 **Improve documentation**: Suggest corrections or clarifications via issues
-
-Thank you for understanding, and I appreciate your interest in VoiceInk!
-
----
-
-For more information, see [CONTRIBUTING.md](../CONTRIBUTING.md)
+- [ ] The change touches only VoiceInk-Free files (scripts/free/, .github/, README.md, README.ru.md, appcast-free.xml).

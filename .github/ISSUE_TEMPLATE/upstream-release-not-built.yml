@@ -1,0 +1,44 @@
+name: New VoiceInk version was not built
+description: The original project released a new version, but there is no VoiceInk-Free release for it.
+title: "[Build] VoiceInk vX.Y was not built"
+labels: ["build", "upstream-release"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        New tags of [Beingpax/VoiceInk](https://github.com/Beingpax/VoiceInk/tags) are checked once a day at 06:17 UTC,
+        so please wait about a day after the original release before opening this issue.
+  - type: input
+    id: tag
+    attributes:
+      label: Upstream tag
+      description: Tag of the original release that has no VoiceInk-Free build.
+      placeholder: v2.28
+    validations:
+      required: true
+  - type: input
+    id: upstream-release
+    attributes:
+      label: Link to the original release
+      placeholder: https://github.com/Beingpax/VoiceInk/releases/tag/v2.28
+  - type: input
+    id: run
+    attributes:
+      label: Failed workflow run (if you found one)
+      description: See the [Build release](https://github.com/ergSey/VoiceInk-Free/actions/workflows/build-release.yml) runs.
+      placeholder: https://github.com/ergSey/VoiceInk-Free/actions/runs/...
+  - type: textarea
+    id: details
+    attributes:
+      label: Details
+      description: Anything else, e.g. the error from the build log.
+      render: shell
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: Checks
+      options:
+        - label: At least a day has passed since the original release.
+          required: true
+        - label: There is no open issue for this version yet.
+          required: true

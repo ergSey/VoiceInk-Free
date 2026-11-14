@@ -1,0 +1,73 @@
+name: Problem with the DMG or installation
+description: A VoiceInk-Free DMG does not download, verify, open, install or launch.
+title: "[Install] "
+labels: ["build"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        This form is for problems specific to the **VoiceInk-Free** builds.
+        Bugs in the app itself (transcription, models, UI) belong to [Beingpax/VoiceInk](https://github.com/Beingpax/VoiceInk/issues).
+        Please read the [install instructions](https://github.com/ergSey/VoiceInk-Free#install) first.
+  - type: input
+    id: version
+    attributes:
+      label: VoiceInk-Free version
+      description: Release tag or DMG file name.
+      placeholder: v2.27 / VoiceInk-2.27-arm64.dmg
+    validations:
+      required: true
+  - type: input
+    id: macos
+    attributes:
+      label: macOS version
+      placeholder: macOS 26.1 (25B78)
+    validations:
+      required: true
+  - type: input
+    id: mac
+    attributes:
+      label: Mac model and chip
+      description: Builds are for Apple Silicon (arm64) only.
+      placeholder: MacBook Air, M2
+    validations:
+      required: true
+  - type: dropdown
+    id: stage
+    attributes:
+      label: Where does it fail?
+      options:
+        - Download or checksum (shasum)
+        - Opening the DMG
+        - Copying to Applications
+        - First launch (Gatekeeper, "damaged", "cannot be opened")
+        - Permissions (microphone, accessibility)
+        - The app starts but behaves differently from the official build
+        - Something else
+    validations:
+      required: true
+  - type: textarea
+    id: what-happened
+    attributes:
+      label: What happened
+      description: What you did, what you expected and what you got. Screenshots help.
+    validations:
+      required: true
+  - type: textarea
+    id: output
+    attributes:
+      label: Terminal output
+      description: |
+        Output of the commands you ran, for example:
+        `shasum -a 256 -c VoiceInk-2.27-arm64.dmg.sha256`, `xattr -cr /Applications/VoiceInk.app`,
+        `codesign -dv /Applications/VoiceInk.app`.
+      render: shell
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: Checks
+      options:
+        - label: I searched existing issues and discussions.
+          required: true
+        - label: I ran `xattr -cr /Applications/VoiceInk.app` (or used "Open Anyway") as described in the README.
+        - label: The SHA-256 checksum of the DMG matches the `.sha256` file from the release.

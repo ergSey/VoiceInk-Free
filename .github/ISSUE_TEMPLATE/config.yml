@@ -1,0 +1,15 @@
+# Issues here are only about VoiceInk-Free builds: the DMG, installation and the
+# release workflow. The app's code comes unchanged from the original project.
+blank_issues_enabled: false
+contact_links:
+  - name: Bug in VoiceInk itself or a feature request
+    url: https://github.com/Beingpax/VoiceInk/issues
+    about: >-
+      Transcription, models, UI, crashes and new features belong to the original
+      project (Beingpax/VoiceInk). Please mention that you use an unofficial build.
+  - name: Question or help with installation
+    url: https://github.com/ergSey/VoiceInk-Free/discussions
+    about: Ask how to install, update or verify a VoiceInk-Free build.
+  - name: Install instructions
+    url: https://github.com/ergSey/VoiceInk-Free#install
+    about: Gatekeeper warning "app is damaged" or "cannot be opened"? Read this first.
