@@ -9,6 +9,10 @@
 # Releases are created as drafts by default. Scheduled runs publish them right
 # away only when the repository variable PUBLISH_RELEASES is "true".
 #
+# Rebuild: a manual run with `rebuild` set rebuilds a tag whose release already
+# exists (e.g. after changing scripts/free) and replaces its DMG, checksum and
+# notes in place. The release keeps its tag, title and draft/published state.
+#
 # Keepalive: GitHub disables scheduled workflows in a public repository after
 # 60 days without repository activity, and this workflow makes no commits.
 # Every run re-enables itself through the REST API (no dummy commits). If it
@@ -30,6 +34,11 @@ on:
         type: boolean
         required: false
         default: true
+      rebuild:
+        description: "Release already exists: rebuild it and replace its DMG and notes"
+        type: boolean
+        required: false
+        default: false
 
 permissions:
   contents: write
@@ -69,6 +78,7 @@ jobs:
       tag: ${{ steps.tag.outputs.tag }}
       latest: ${{ steps.tag.outputs.latest }}
       build: ${{ steps.release.outputs.build }}
+      replace: ${{ steps.release.outputs.replace }}
     steps:
       - name: Resolve tag
         id: tag
@@ -93,15 +103,22 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
           TAG: ${{ steps.tag.outputs.tag }}
+          INPUT_REBUILD: ${{ inputs.rebuild }}
         run: |
           set -euo pipefail
           # Lists drafts too (the token has push access).
           existing="$(gh api --paginate "repos/$GITHUB_REPOSITORY/releases?per_page=100" --jq '.[].tag_name')"
-          if grep -qxF "$TAG" <<<"$existing"; then
+          if ! grep -qxF "$TAG" <<<"$existing"; then
+            echo "build=true" >> "$GITHUB_OUTPUT"
+            echo "replace=false" >> "$GITHUB_OUTPUT"
+          elif [[ "$INPUT_REBUILD" == "true" ]]; then
+            echo "::notice::Release $TAG exists, rebuilding it and replacing its DMG"
+            echo "build=true" >> "$GITHUB_OUTPUT"
+            echo "replace=true" >> "$GITHUB_OUTPUT"
+          else
             echo "::notice::Release $TAG already exists, nothing to build"
             echo "build=false" >> "$GITHUB_OUTPUT"
-          else
-            echo "build=true" >> "$GITHUB_OUTPUT"
+            echo "replace=false" >> "$GITHUB_OUTPUT"
           fi
 
       - name: Check out this repository
@@ -219,6 +236,7 @@ jobs:
           INPUT_DRAFT: ${{ inputs.draft }}
           PUBLISH_RELEASES: ${{ vars.PUBLISH_RELEASES }}
           LATEST: ${{ needs.check.outputs.latest }}
+          REPLACE: ${{ needs.check.outputs.replace }}
           XCODE_VERSION: ${{ steps.xcode.outputs.version }}
           XCODE_BUILD: ${{ steps.xcode.outputs.build }}
           DMG_DIR: ${{ runner.temp }}/dmg
@@ -271,6 +289,13 @@ jobs:
 
           If VoiceInk is useful to you, please support the author by [buying a license](https://tryvoiceink.com/pricing).
           EOF
+
+          if [[ "$REPLACE" == "true" ]]; then
+            gh release upload "$TAG" "$dmg" "$dmg.sha256" -R "$GITHUB_REPOSITORY" --clobber
+            gh release edit "$TAG" -R "$GITHUB_REPOSITORY" --notes-file "$notes"
+            echo "::notice::Release $TAG rebuilt: DMG and notes replaced, SHA-256 $sha256"
+            exit 0
+          fi
 
           # Drafts do not own their tag, so check the full list (drafts included).
           existing="$(gh api --paginate "repos/$GITHUB_REPOSITORY/releases?per_page=100" --jq '.[].tag_name')"
